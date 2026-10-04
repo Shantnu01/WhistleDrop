@@ -108,14 +108,16 @@ Copy the template to create your `.env` file:
 ```bash
 cp .env.example .env
 ```
-Default configuration values:
+Default configuration template:
 ```env
 PORT=3001
 DATABASE_URL="postgresql://postgres:postgres@localhost:5454/whistledrop"
 REDIS_URL="redis://localhost:6380"
-JWT_SECRET="AFh0yKqEW0T0DK9XelC5hW8v0xTHtyvODAgBrDdkgQn"
+JWT_SECRET="replace_with_your_strong_random_secret_min_32_chars"
 NODE_ENV="development"
 ```
+
+> ⚠️ **Security Notice:** Never commit actual production secrets to version control. Keep real credentials in your local `.env` file (which is gitignored) and generate a secure random 256-bit key for production deployments.
 
 ### 3. Spin Up PostgreSQL & Redis
 WhistleDrop includes a turnkey `docker-compose.yml` configured on non-conflicting ports (`5454` for Postgres, `6380` for Redis):
