@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhistleDrop Admin</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #000; color: #fff; }
+    .container-form { background: #222; border-color: #555; color: #fff; }
+    .container-form h2 { color: #FF87AB; }
+    .form-group label { color: #ccc; }
+    .table-container { overflow-x: auto; margin-top: 2rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 1rem; border: 1px solid #555; text-align: left; vertical-align: middle; }
+    th { background: #FF87AB; color: #000; font-family: var(--font-heading); text-transform: uppercase; }
+    td { background: #333; }
+    .badge { padding: 0.3rem 0.6rem; border-radius: 4px; font-weight: bold; }
+    .badge-UNDER_REVIEW { background: #FFA500; color: #000; }
+    .badge-SUBMITTED { background: #fff; color: #000; }
+    .badge-RESOLVED { background: #4CAF50; color: #fff; }
+    .badge-DISMISSED { background: #F44336; color: #fff; }
+    
+    .action-btn { background: #FF87AB; color: #000; border: none; padding: 0.6rem 1rem; cursor: pointer; font-weight: bold; border-radius: 6px; }
+    .action-btn:hover { background: #fff; }
+
+    .view-btn {
+      background: #222;
+      color: #FF87AB;
+      border: 2px solid #FF87AB;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: all 0.2s;
+      font-family: var(--font-body);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .view-btn:hover {
+      background: #FF87AB;
+      color: #000;
+      transform: translateY(-2px);
+    }
+    
+    #modal, #details-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 100;}
+    .modal-content { background: #222; padding: 2rem; border: 3px solid #FF87AB; border-radius: 12px; max-width: 500px; width: 90%; }
+  </style>
+</head>
+<body>
+  
+  <div class="slides">
+    <!-- Login Slide -->
+    <section class="slide is-active" id="login-slide">
+      <div class="container container-form">
+        <h2>Moderator Login</h2>
+        <form id="login-form">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="background:#FF87AB; color:#000;">Login</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Dashboard Slide -->
+    <section class="slide" id="dashboard-slide" style="display: none; align-items: flex-start; padding-top: 5rem;">
+      <div class="container" style="max-width: 1300px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2 style="font-family: var(--font-heading); font-size: 3rem; color: #FF87AB;">All Cases</h2>
+          <button class="btn" onclick="logout()" style="background:#fff; color:#000;">Logout</button>
+        </div>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Case Code</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="reports-table-body">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- View Details Modal -->
+  <div id="details-modal">
+    <div class="modal-content" style="max-width: 650px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; border-bottom: 2px solid #444; padding-bottom: 0.8rem;">
+        <h3 style="color:#FF87AB; font-family: var(--font-heading); font-size: 2rem; margin:0;">Report Details</h3>
+        <button type="button" class="btn" style="padding: 0.3rem 0.8rem; background: #fff; color: #000; font-size: 1rem; cursor: pointer;" onclick="closeDetailsModal()">✕ Close</button>
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <span style="color:#aaa; font-size: 0.85rem; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Case Code:</span>
+        <div id="details-case-code" style="font-family: monospace; font-size: 1.5rem; color: #fff; font-weight: bold; margin-top: 0.2rem;"></div>
+      </div>
+
+      <div style="display: flex; gap: 2rem; margin-bottom: 1.2rem;">
+        <div>
+          <span style="color:#aaa; font-size: 0.85rem; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Category:</span>
+          <div id="details-category" style="font-weight: bold; color: #fff; margin-top: 0.2rem;"></div>
+        </div>
+        <div>
+          <span style="color:#aaa; font-size: 0.85rem; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Status:</span>
+          <div id="details-status" style="margin-top: 0.2rem;"></div>
+        </div>
+        <div>
+          <span style="color:#aaa; font-size: 0.85rem; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Submitted Date:</span>
+          <div id="details-date" style="color: #fff; margin-top: 0.2rem;"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 1.2rem;">
+        <span style="color:#aaa; font-size: 0.85rem; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Submitted Message (Description):</span>
+        <div id="details-description" style="margin-top: 0.4rem; background: #111; border: 2px solid #555; padding: 1.2rem; border-radius: 8px; white-space: pre-wrap; word-break: break-word; color: #fff; font-size: 1.05rem; line-height: 1.6; max-height: 220px; overflow-y: auto;"></div>
+      </div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <span style="color:#aaa; font-size: 0.85rem; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Attached Evidence URL:</span>
+        <div id="details-url" style="margin-top: 0.4rem; padding: 0.8rem; background: #111; border: 2px solid #555; border-radius: 8px; word-break: break-all;"></div>
+      </div>
+
+      <button type="button" class="btn btn-primary" style="background:#FF87AB; color:#000; width: 100%; padding: 0.8rem;" onclick="closeDetailsModal()">Close Details</button>
+    </div>
+  </div>
+
+  <!-- Update Status Modal -->
+  <div id="modal">
+    <div class="modal-content">
+      <h3 style="color:#FF87AB; margin-bottom: 1rem; font-family: var(--font-heading); font-size: 2rem;">Update Status</h3>
+      <form id="update-form">
+        <input type="hidden" id="update-report-id">
+        <div class="form-group">
+          <label>New Status</label>
+          <select id="update-status" required>
+            <option value="UNDER_REVIEW">Under Review</option>
+            <option value="RESOLVED">Resolved</option>
+            <option value="DISMISSED">Dismissed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Moderator Note</label>
+          <textarea id="update-note" rows="3" required placeholder="Explain this update..."></textarea>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+          <button type="submit" class="btn btn-primary" style="background:#FF87AB; color:#000;">Save Update</button>
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal').style.display='none'">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="admin.js?v=3"></script>
+</body>
+</html>
