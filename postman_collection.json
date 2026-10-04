@@ -1,0 +1,199 @@
+{
+  "info": {
+    "name": "WhistleDrop API Collection",
+    "_postman_id": "whistledrop-api-v1",
+    "description": "Complete Postman collection for testing the WhistleDrop Confidential Reporting API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "caseCode",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reportId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Public - Submit Anonymous Report",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.caseCode) {",
+              "    pm.collectionVariables.set('caseCode', jsonData.caseCode);",
+              "    console.log('Saved caseCode:', jsonData.caseCode);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"category\": \"SECURITY\",\n  \"description\": \"Observed an unauthorized credential dumping script running on internal staging server.\",\n  \"evidenceUrl\": \"https://github.com/incident-report/dump.log\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/reports",
+          "host": ["{{baseUrl}}"],
+          "path": ["reports"]
+        },
+        "description": "Submit a new anonymous report. Note: Category must be one of: SECURITY, HARASSMENT, CORRUPTION, TECHNICAL, OTHER. Description must be at least 10 characters."
+      }
+    },
+    {
+      "name": "2. Public - Track Case by Code",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/reports/{{caseCode}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["reports", "{{caseCode}}"]
+        },
+        "description": "Track the status and timeline of a submitted report using the 14-character Case Code."
+      }
+    },
+    {
+      "name": "3. Auth - Moderator Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.token) {",
+              "    pm.collectionVariables.set('token', jsonData.token);",
+              "    console.log('Saved JWT token to collection variables');",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "login"]
+        },
+        "description": "Authenticate moderator and receive a signed JWT. Running this automatically populates {{token}} for subsequent requests."
+      }
+    },
+    {
+      "name": "4. Moderator - List All Reports",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.data && jsonData.data.length > 0) {",
+              "    pm.collectionVariables.set('reportId', jsonData.data[0].id);",
+              "    console.log('Saved first reportId:', jsonData.data[0].id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/reports/moderator/all?page=1&limit=20",
+          "host": ["{{baseUrl}}"],
+          "path": ["reports", "moderator", "all"],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "20"
+            }
+          ]
+        },
+        "description": "List all submitted reports with pagination. Requires moderator Bearer token."
+      }
+    },
+    {
+      "name": "5. Moderator - Update Report Status",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"UNDER_REVIEW\",\n  \"note\": \"Initial assessment completed; escalating to security response team for investigation.\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/reports/moderator/{{reportId}}/status",
+          "host": ["{{baseUrl}}"],
+          "path": ["reports", "moderator", "{{reportId}}", "status"]
+        },
+        "description": "Update the status of a report and append an audit note. Allowed statuses: SUBMITTED, UNDER_REVIEW, RESOLVED, DISMISSED."
+      }
+    }
+  ]
+}

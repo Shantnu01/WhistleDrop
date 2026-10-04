@@ -178,6 +178,50 @@ npx http-server ./frontend -p 8080 -c-1
 
 ---
 
+## 📮 Postman Testing Guide
+
+WhistleDrop includes a ready-to-use, pre-configured **Postman Collection v2.1** (`postman_collection.json`) in the root directory.
+
+### Option A: 1-Click Postman Import (Recommended)
+1. Open **Postman**.
+2. Click **Import** (top left) and select or drag-and-drop [`postman_collection.json`](postman_collection.json).
+3. The collection imports all 5 requests with automatic variable chaining:
+   * When you run **Submit Anonymous Report**, your new `caseCode` is automatically saved to variables.
+   * When you run **Moderator Login**, the returned JWT `token` is automatically captured and attached as Bearer Token to all protected requests.
+   * When you run **List All Reports**, the first `reportId` is automatically captured for the update request.
+
+---
+
+### Option B: Manual Testing Parameters
+
+#### 1. Global Connection & Auth Settings
+* **Base URL:** `http://localhost:3001/api`
+* **Default Moderator Credentials:**
+  * **Username:** `admin`
+  * **Password:** `admin123`
+* **Header required for JSON requests:**
+  * `Content-Type: application/json`
+* **Header required for Moderator endpoints:**
+  * `Authorization: Bearer <YOUR_JWT_TOKEN>`
+
+#### 2. Allowed Enumeration Values (Strict Validation)
+To avoid Zod validation errors, ensure your request payloads use these exact allowed values:
+* **`category` (Case-Sensitive):**
+  * `"SECURITY"`
+  * `"HARASSMENT"`
+  * `"CORRUPTION"`
+  * `"TECHNICAL"`
+  * `"OTHER"`
+* **`status` (Case-Sensitive):**
+  * `"SUBMITTED"`
+  * `"UNDER_REVIEW"`
+  * `"RESOLVED"`
+  * `"DISMISSED"`
+* **`description`:** String (minimum 10 characters required)
+* **`evidenceUrl`:** Optional string (must be valid `https://...` URL or blank `""`)
+
+---
+
 ## 📡 REST API Reference
 
 ### Public Endpoints
