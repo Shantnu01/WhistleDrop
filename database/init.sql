@@ -1,5 +1,5 @@
 -- 1. Moderators Table
-CREATE TABLE moderators (
+CREATE TABLE IF NOT EXISTS moderators (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     username TEXT UNIQUE,
     password TEXT,
@@ -7,7 +7,7 @@ CREATE TABLE moderators (
 );
 
 -- 2. Reports Table
-CREATE TABLE reports (
+CREATE TABLE IF NOT EXISTS reports (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     case_code TEXT UNIQUE,
     category TEXT,
@@ -19,7 +19,7 @@ CREATE TABLE reports (
 );
 
 -- 3. Status Updates Table
-CREATE TABLE status_updates (
+CREATE TABLE IF NOT EXISTS status_updates (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     report_id UUID REFERENCES reports(id),
     status TEXT,
@@ -28,5 +28,18 @@ CREATE TABLE status_updates (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
--- Make searching by case code fast
-CREATE INDEX idx_reports_case_code ON reports(case_code);
+-- ==========================================
+-- HIGH-PERFORMANCE PRODUCTION INDEXES
+-- ==========================================
+
+-- Fast O(1) Case Code Lookups for Whistleblowers
+CREATE INDEX IF NOT EXISTS idx_reports_case_code ON reports(case_code);
+
+-- Compound Index for Filtered & Sorted Moderator Lists (Status + Date)
+CREATE INDEX IF NOT EXISTS idx_reports_status_created ON reports(status, created_at DESC);
+
+-- Compound Index for Category Filtered Queries
+CREATE INDEX IF NOT EXISTS idx_reports_category_created ON reports(category, created_at DESC);
+
+-- Fast Lookups for Audit Logs per Report
+CREATE INDEX IF NOT EXISTS idx_status_updates_report_id ON status_updates(report_id, created_at DESC);

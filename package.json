@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
+    "start:cluster": "node -e \"process.env.CLUSTER_MODE='true'; require('./src/server.js')\"",
     "seed:admin": "node create-admin.js"
   },
   "keywords": [
@@ -21,6 +22,7 @@
   "type": "commonjs",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "compression": "^1.8.2",
     "cors": "^2.8.6",
     "dotenv": "^18.0.4",
     "express": "^5.2.1",

@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const compression = require('compression');
 const authRoutes = require('./routes/auth.routes');
 const reportRoutes = require('./routes/report.routes');
 const globalErrorHandler = require('./middlewares/error.middleware');
@@ -9,6 +10,7 @@ const AppError = require('./utils/AppError');
 const app = express();
 
 app.use(helmet());
+app.use(compression()); // Gzip/Brotli automatic payload compression
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
