@@ -3,8 +3,10 @@ const { Client } = require('pg');
 const { env } = require('./src/config/env');
 
 async function createAdmin() {
+  const isRemote = env.NODE_ENV === 'production' || (env.DATABASE_URL && !env.DATABASE_URL.includes('localhost'));
   const client = new Client({
-    connectionString: env.DATABASE_URL
+    connectionString: env.DATABASE_URL,
+    ssl: isRemote ? { rejectUnauthorized: false } : false,
   });
 
   try {

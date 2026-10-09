@@ -1,8 +1,11 @@
 const { Pool } = require('pg');
 const { env } = require('./env');
 
+const isRemoteOrProduction = env.NODE_ENV === 'production' || (env.DATABASE_URL && !env.DATABASE_URL.includes('localhost'));
+
 const pool = new Pool({
   connectionString: env.DATABASE_URL,
+  ssl: isRemoteOrProduction ? { rejectUnauthorized: false } : false,
 });
 
 pool.on('error', (err) => {
