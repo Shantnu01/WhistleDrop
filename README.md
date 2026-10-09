@@ -2,6 +2,18 @@
 
 > **Confidential, zero-knowledge organizational whistleblowing and case tracking platform.**
 
+[![Live Web App](https://img.shields.io/badge/Live_App-Render-0284c7?style=for-the-badge&logo=render&logoColor=white)](https://whistledrop-9oew.onrender.com/)
+[![Admin Portal](https://img.shields.io/badge/Admin_Portal-Live-FF87AB?style=for-the-badge&logo=auth0&logoColor=black)](https://whistledrop-9oew.onrender.com/admin.html)
+[![Backend API](https://img.shields.io/badge/Backend_API-Render-22c55e?style=for-the-badge&logo=fastapi&logoColor=white)](https://whistledrop-api.onrender.com/api)
+
+---
+
+## 🔗 Live Deployments
+
+* 🌐 **Public Whistleblower Site:** [https://whistledrop-9oew.onrender.com/](https://whistledrop-9oew.onrender.com/)
+* 💼 **Moderator Command Center:** [https://whistledrop-9oew.onrender.com/admin.html](https://whistledrop-9oew.onrender.com/admin.html)
+* ⚡ **Production Backend API:** [https://whistledrop-api.onrender.com/api](https://whistledrop-api.onrender.com/api)
+
 WhistleDrop provides a secure, privacy-first channel for employees and stakeholders to safely report misconduct, harassment, security incidents, and corruption without revealing their identity or creating an account. Authorized moderators can review reports, inspect submitted messages and evidence URLs, and manage audit updates through a dedicated, protected dashboard.
 
 ---
